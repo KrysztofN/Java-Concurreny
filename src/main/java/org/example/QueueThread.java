@@ -14,17 +14,24 @@ public class QueueThread extends Thread {
     public void run() {
         Random r = new Random();
         while(true) {
-            int sleepTime = r.nextInt(5000);
+            int sleepTime = r.nextInt(10000);
             int option = r.nextInt(3);
             try {
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } finally {
-                int isFull = queue.enqueue(options[option]);
-                if (isFull == 1) {
+                if (queue.isFull()) {
                     System.out.println("Queue full");
                 } else{
+                    try {
+                        queue.enqueue(options[option]);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     System.out.println("Added "+ queue.size() + " value: " + options[option] + " to the queue");
                 }
             }

@@ -5,31 +5,35 @@ import java.util.Queue;
 
 public class QueueSharedResource {
     private Queue<String> queue = new LinkedList<String>();
+    private static final int MAX_CAPACITY = 5;
 
-    public synchronized int enqueue(String item) {
-        if(queue.size() < 10) {
-            queue.add(item);
-            return 0;
+    public synchronized void enqueue(String item) throws InterruptedException {
+        if(isFull()){
+            wait();
         } else {
-            return 1;
+            queue.add(item);
+            notifyAll();
         }
     }
 
     public synchronized boolean isFull(){
-        if(queue.size() < 5) {
+        if(queue.size() < MAX_CAPACITY) {
             return false;
         } return true;
     }
 
-    public synchronized String dequeue() {
-        if(queue.isEmpty()) {
-            return null;
-        } else {
-            return queue.poll();
+    public synchronized String dequeue() throws InterruptedException {
+        while(queue.isEmpty()) {
+            wait();
         }
+
+        String item =  queue.poll();
+        notifyAll();
+        return item;
+
     }
 
-    public String peek() {
+    public synchronized String peek() {
         if(queue.isEmpty()) {
             return null;
         } else{
@@ -37,7 +41,7 @@ public class QueueSharedResource {
         }
     }
 
-    public int size() {
+    public synchronized int size() {
         return queue.size();
     }
 
