@@ -8,12 +8,13 @@ public class QueueSharedResource {
     private static final int MAX_CAPACITY = 5;
 
     public synchronized void enqueue(String item) throws InterruptedException {
-        if(isFull()){
+        while(isFull()){
             wait();
-        } else {
-            queue.add(item);
-            notifyAll();
         }
+        queue.add(item);
+        System.out.println("People in queue: " + queue.size() + " Enqueued " + item);
+        notifyAll();
+
     }
 
     public synchronized boolean isFull(){
@@ -28,6 +29,7 @@ public class QueueSharedResource {
         }
 
         String item =  queue.poll();
+        System.out.println("People in queue: " + queue.size() + " Serving customer: " + item);
         notifyAll();
         return item;
 

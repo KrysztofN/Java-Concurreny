@@ -14,7 +14,7 @@ public class QueueThread extends Thread {
     public void run() {
         Random r = new Random();
         while(true) {
-            int sleepTime = r.nextInt(10000);
+            int sleepTime = r.nextInt(1000);
             int option = r.nextInt(3);
             try {
                 if (Thread.currentThread().isInterrupted()) {
@@ -32,7 +32,6 @@ public class QueueThread extends Thread {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    System.out.println("Added "+ queue.size() + " value: " + options[option] + " to the queue");
                 }
             }
         }

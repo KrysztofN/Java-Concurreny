@@ -12,9 +12,10 @@ public class Main {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         QueueSharedResource queue = new QueueSharedResource();
+        ChairsSharedResource chairs = new ChairsSharedResource();
 
         QueueThread qt = new QueueThread(queue);
-        SchedulerThread st = new SchedulerThread(queue);
+        SchedulerThread st = new SchedulerThread(queue, chairs);
 
         qt.start();
         st.start();

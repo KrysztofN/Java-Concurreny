@@ -4,54 +4,49 @@ import java.util.Queue;
 import java.util.Random;
 
 public class SchedulerThread extends Thread {
-    private QueueSharedResource queue;
+    private final QueueSharedResource queue;
+    private final ChairsSharedResource chairs;
+    private volatile boolean running = true;
 
-    public SchedulerThread(QueueSharedResource queue) {
+    public SchedulerThread(QueueSharedResource queue, ChairsSharedResource chairs) {
         this.queue = queue;
+        this.chairs = chairs;
     }
 
     @Override
     public void run() {
-        Random r = new Random();
-        String service = "F";
-        int min = 0;
-        int max = 0;
-        while (true) {
-            if(queue.size() > 0){
-                try {
-                    Thread.sleep(calculateServiceTime(service));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+        while (running && !Thread.currentThread().isInterrupted()) {
+            try {
+                if(queue.size() > 0 && chairs.acquireChair()){
+                    String service = queue.dequeue();
+                    processService(service);
                 }
-                try {
-                    service = queue.dequeue();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                System.out.println("People in queue: "+ queue.size() +" Serving customer, option: " + service);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
 
-    public int calculateServiceTime(String service){
-        int min = 0;
-        int max = 0;
+    private void processService(String service) throws InterruptedException {
+        int serviceTime = calculateServiceTime(service);
 
-        switch (service) {
-            case "S" -> {
-                min = 5000;
-                max = 10000;
-            }
-            case "G" -> {
-                min = 2000;
-                max = 5000;
-            }
-            case "M" -> {
-                min = 1000;
-                max = 2000;
-            }
-        }
-        Utils utils = new Utils();
-        return utils.getRandomInRange(min, max);
+        Thread.sleep(serviceTime);
+        chairs.releaseChair();
+        System.out.println("Completed service type: " + service);
+    }
+
+    private int calculateServiceTime(String service) {
+        Random random = new Random();
+        return switch (service) {
+            case "S" -> // Slow service
+                    random.nextInt(5000, 10000);
+            case "M" -> // Medium service
+                    random.nextInt(1000, 2000);
+            case "G" -> // Quick service
+                    random.nextInt(2000, 5000);
+            default -> 3000; // Default service time
+        };
     }
 }
