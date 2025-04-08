@@ -8,22 +8,17 @@ public class ChairsSharedResource {
         return CHAIR_CAPACITY - chairsInUse;
     }
 
-    public synchronized void releaseChair(){
-        if (chairsInUse > 0) {
-            chairsInUse--;
-        }
+    public synchronized void releaseChair(String customer){
+        System.out.println("Customer " + customer + " has been served");
+        chairsInUse--;
     }
 
-    public synchronized boolean acquireChair() {
-        if (chairsInUse >= CHAIR_CAPACITY) {
-            return false;
-        }
+    public synchronized void acquireChair(String customer) {
+        System.out.println("Serving customer: " + customer);
         chairsInUse++;
-        return true;
     }
 
-    public boolean hasAvailableChairs() {
+    public synchronized boolean hasAvailableChairs() {
         return CHAIR_CAPACITY - chairsInUse > 0;
     }
-
 }

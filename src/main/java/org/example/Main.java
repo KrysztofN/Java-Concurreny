@@ -13,12 +13,16 @@ public class Main {
 
         QueueSharedResource queue = new QueueSharedResource();
         ChairsSharedResource chairs = new ChairsSharedResource();
+        HairDressersSharedResource hairdresser = new HairDressersSharedResource();
 
         QueueThread qt = new QueueThread(queue);
-        SchedulerThread st = new SchedulerThread(queue, chairs);
-
         qt.start();
-        st.start();
+
+        SchedulerThread[] st = new SchedulerThread[4];
+        for(int i=0; i<4; i++){
+            st[i] = new SchedulerThread(queue, chairs, hairdresser);
+            st[i].start();
+        }
 
 
 //        DefaultTerminalFactory defaultTerminalFactory = new DefaultTerminalFactory();
@@ -27,7 +31,7 @@ public class Main {
 //            terminal = defaultTerminalFactory.createTerminal();
 //            terminal.setForegroundColor(TextColor.ANSI.GREEN);
 //            AnimatedText animatedText = new AnimatedText(terminal);
-//            animatedText.animateText("Hello World");
+//            animatedText.animateText("Jestem Simon, buahaha");
 //            Thread.sleep(2000);
 //
 //        } catch (IOException e) {

@@ -1,10 +1,11 @@
 package org.example;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class QueueSharedResource {
-    private Queue<String> queue = new LinkedList<String>();
+    private final Queue<String> queue = new LinkedList<String>();
     private static final int MAX_CAPACITY = 5;
 
     public synchronized void enqueue(String item) throws InterruptedException {
@@ -12,7 +13,7 @@ public class QueueSharedResource {
             wait();
         }
         queue.add(item);
-        System.out.println("People in queue: " + queue.size() + " Enqueued " + item);
+        System.out.println("Enqueued " + item + " People in queue: " + queue.size());
         notifyAll();
 
     }
@@ -29,7 +30,7 @@ public class QueueSharedResource {
         }
 
         String item =  queue.poll();
-        System.out.println("People in queue: " + queue.size() + " Serving customer: " + item);
+        System.out.println("People in queue: " + queue.size() + " Dequeued " + item);
         notifyAll();
         return item;
 
@@ -47,4 +48,14 @@ public class QueueSharedResource {
         return queue.size();
     }
 
+    public synchronized String returnFirstOccurence(HashMap<String, Boolean> hairdressersAvailable) {
+        for(String customer : queue){
+            if(hairdressersAvailable.get(customer.substring(0, 1))) return customer;
+        }
+        return "";
+    }
+
+    public synchronized void removeFromFifo(String customer) {
+        queue.remove(customer);
+    }
 }
