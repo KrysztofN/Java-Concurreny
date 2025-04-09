@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -7,15 +8,33 @@ import java.util.Queue;
 public class QueueSharedResource {
     private final Queue<String> queue = new LinkedList<String>();
     private static final int MAX_CAPACITY = 5;
+    private final ArrayList<QueueEventListener> listeners = new ArrayList<>();
+
+    public synchronized void addQueueListener(final QueueEventListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+    public synchronized void removeQueueListener(final QueueEventListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for(QueueEventListener listener : listeners) {
+            listener.onQueueChanged(this);
+        }
+    }
 
     public synchronized void enqueue(String item) throws InterruptedException {
         while(isFull()){
+//            System.out.println("Queue full");
             wait();
         }
         queue.add(item);
-        System.out.println("Enqueued " + item + " People in queue: " + queue.size());
-        notifyAll();
 
+//        System.out.println("Enqueued " + item + " People in queue: " + queue.size());
+        notifyListeners();
+        notifyAll();
     }
 
     public synchronized boolean isFull(){
@@ -30,7 +49,8 @@ public class QueueSharedResource {
         }
 
         String item =  queue.poll();
-        System.out.println("People in queue: " + queue.size() + " Dequeued " + item);
+//        System.out.println("People in queue: " + queue.size() + " Dequeued " + item);
+        notifyListeners();
         notifyAll();
         return item;
 
@@ -55,7 +75,12 @@ public class QueueSharedResource {
         return "";
     }
 
-    public synchronized void removeFromFifo(String customer) {
+    public synchronized void removeFromFifo(String customer) throws InterruptedException {
         queue.remove(customer);
+        notifyListeners();
+    }
+
+    public synchronized Queue<String> getQueueCopy(){
+        return new LinkedList<>(queue);
     }
 }

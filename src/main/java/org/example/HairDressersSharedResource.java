@@ -1,9 +1,27 @@
 package org.example;
 
+import java.util.ArrayList;
+
 public class HairDressersSharedResource {
     private int hairdressersS = 2;
     private int hairdressersM = 2;
     private int hairdressersG = 2;
+    private final ArrayList<HairdressersEventListener> listeners = new ArrayList<>();
+
+    public synchronized void addHairdressersListener(final HairdressersEventListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+    public synchronized void removeHairdressersListener(final HairdressersEventListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for(HairdressersEventListener listener : listeners) {
+            listener.onHairDresserChange(this);
+        }
+    }
 
     public synchronized void decrementHairdressers(String hairdresser) {
         switch (hairdresser) {
@@ -11,6 +29,7 @@ public class HairDressersSharedResource {
             case "M" -> hairdressersM--;
             case "G" -> hairdressersG--;
         }
+        notifyListeners();
     }
 
     public synchronized void incrementHairdressers(String hairdresser) {
@@ -19,6 +38,7 @@ public class HairDressersSharedResource {
             case "M" -> hairdressersM++;
             case "G" -> hairdressersG++;
         }
+        notifyListeners();
     }
 
     public synchronized boolean hasAvailableHairdressers(String hairdresser) {

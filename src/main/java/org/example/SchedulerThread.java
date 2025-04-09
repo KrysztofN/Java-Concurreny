@@ -35,15 +35,16 @@ public class SchedulerThread extends Thread {
                         if (!customer.isEmpty()) {
                             queue.removeFromFifo(customer);
                             service = String.valueOf(customer.charAt(0));
+
+                            hairDressers.decrementHairdressers(service);
+                            chairs.acquireChair(customer);
                         }
                     }
                 }
 
                 if (customer != null && service != null) {
-                    System.out.println(customer + " Available Hairdressers of type " + service + " : " +
-                            hairDressers.availableHairdressers(service));
-                    hairDressers.decrementHairdressers(service);
-                    chairs.acquireChair(customer);
+//                    System.out.println(customer + " Available Hairdressers of type " + service + " : " +
+//                            hairDressers.availableHairdressers(service));
                     processService(customer, service);
                 } else {
                     Thread.sleep(100);
@@ -59,21 +60,21 @@ public class SchedulerThread extends Thread {
     private void processService(String customer, String service) throws InterruptedException {
         int serviceTime = calculateServiceTime(service);
 
-        System.out.println(customer + " Available chairs: " + chairs.availableChairs());
+//        System.out.println(customer + " Available chairs: " + chairs.availableChairs());
         Thread.sleep(serviceTime);
         chairs.releaseChair(customer);
         hairDressers.incrementHairdressers(service);
-        System.out.println(customer + " Available chairs: " + chairs.availableChairs());
-        System.out.println(customer + " Available Hairdressers of type " + service + " : " + hairDressers.availableHairdressers(service));
+//        System.out.println(customer + " Available chairs: " + chairs.availableChairs());
+//        System.out.println(customer + " Available Hairdressers of type " + service + " : " + hairDressers.availableHairdressers(service));
     }
 
     private int calculateServiceTime(String service) {
         Random random = new Random();
         return switch (service) {
             case "S" -> // Slow service
-                    random.nextInt(5000, 10000);
+                    random.nextInt(8000, 12000);
             case "M" -> // Medium service
-                    random.nextInt(1000, 2000);
+                    random.nextInt(5000, 8000);
             case "G" -> // Quick service
                     random.nextInt(2000, 5000);
             default -> 3000; // Default service time
