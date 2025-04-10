@@ -1,8 +1,6 @@
 package org.example;
 
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextCharacter;
-import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.*;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
@@ -45,6 +43,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
             hairdresserResource.addHairdressersListener(this);
             executor.submit(this::pollForInput);
 
+            drawRandomPixels();
             updateQueueDisplay();
             updateChairDisplay();
             updateHairdresserDisplay();
@@ -70,8 +69,36 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
                     }
                 }
 
+                String sizeLabel = "Witaj w salonie fryzjerskim";
+                int centerX = terminalSize.getColumns() / 2;
+                int centerY = terminalSize.getRows() / 2;
+                TerminalPosition labelBoxTopLeft = new TerminalPosition(centerX - sizeLabel.length()/2, centerY);
+                TerminalSize labelBoxSize = new TerminalSize(sizeLabel.length() + 2, 3);
+                TerminalPosition labelBoxTopRightCorner = labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 1);
+                TextGraphics textGraphics = screen.newTextGraphics();
+                textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
+
+                textGraphics.drawLine(
+                        labelBoxTopLeft.withRelativeColumn(1),
+                        labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2),
+                        Symbols.DOUBLE_LINE_HORIZONTAL);
+                textGraphics.drawLine(
+                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
+                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
+                        Symbols.DOUBLE_LINE_HORIZONTAL);
+
+                textGraphics.setCharacter(labelBoxTopLeft, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
+                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
+                textGraphics.setCharacter(labelBoxTopRightCorner, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
+                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
+                textGraphics.putString(labelBoxTopLeft.withRelative(1, 1), sizeLabel);
+
                 screen.refresh();
-                Thread.sleep(5000);
+                Thread.sleep(3000);
+                screen.clear();
+
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
