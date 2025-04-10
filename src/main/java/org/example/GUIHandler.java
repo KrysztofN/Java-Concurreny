@@ -10,6 +10,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.Random;
@@ -242,6 +243,18 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
         }
     }
 
+    public void displayChairCounter(int time) throws IOException, InterruptedException {
+        char[] nums = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+        TerminalSize terminalSize = screen.getTerminalSize();
+        int centerX = terminalSize.getColumns() -  terminalSize.getColumns() / 8;
+        int centerY = terminalSize.getRows() / 2;
+        for(int i = time; i > 0; i -= 1000){
+            screen.setCharacter(centerX, centerY, new TextCharacter(nums[i/1000 % nums.length]));
+            screen.refresh();
+            Thread.sleep(i);
+        }
+    }
+
     private void updateHairdresserDisplay(){
         synchronized (screen) {
             try {
@@ -253,28 +266,35 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
                 for(int i=0; i < header.length(); i++) {
                     screen.setCharacter(startX + i, startY - 2, new TextCharacter(header.charAt(i)));
                 }
+
+                // Czyszczenie wczesniejszych wartosci
+                for(int i = 0; i < 10; i ++) {
+                    for(int j = 0; j< header.length(); j++){
+                        screen.setCharacter(startX + j, startY + i, new TextCharacter(' '));
+                    }
+                }
+
                 int hairdressersS = hairdressersResource.availableHairdressers("S");
                 int hairdressersM = hairdressersResource.availableHairdressers("M");
                 int hairdressersG = hairdressersResource.availableHairdressers("G");
 
-                int offset = 0;
+                TextGraphics tg = screen.newTextGraphics();
+
+                tg.putString(startX, startY, "Usługa S: ");
                 for(int i=0; i < hairdressersS; i++) {
-                    TextGraphics tg = screen.newTextGraphics();
-                    tg.putString(startX, startY + offset, "HS");
-                    offset++;
+                    screen.setCharacter(startX + 11 + i, startY, new TextCharacter('■', TextColor.ANSI.RED, TextColor.ANSI.BLACK));
                 }
 
-                for(int j=0; j < hairdressersM; j++) {
-                    TextGraphics tg = screen.newTextGraphics();
-                    tg.putString(startX, startY + offset, "HM");
-                    offset++;
+                tg.putString(startX, startY + 2, "Usługa M: ");
+                for(int i=0; i < hairdressersM; i++) {
+                    screen.setCharacter(startX + 11 + i, startY + 2, new TextCharacter('■', TextColor.ANSI.GREEN, TextColor.ANSI.BLACK));
                 }
 
-                for(int k=0; k < hairdressersG; k++) {
-                    TextGraphics tg = screen.newTextGraphics();
-                    tg.putString(startX, startY + offset, "HG");
-                    offset++;
+                tg.putString(startX, startY + 4, "Usługa G: ");
+                for(int i=0; i < hairdressersG; i++) {
+                    screen.setCharacter(startX + 11 + i, startY + 4, new TextCharacter('■', TextColor.ANSI.BLUE, TextColor.ANSI.BLACK));
                 }
+
                 screen.refresh();
 
             } catch (IOException e) {

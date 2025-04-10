@@ -1,5 +1,6 @@
 package org.example;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -49,7 +50,7 @@ public class SchedulerThread extends Thread {
                 } else {
                     Thread.sleep(100);
                 }
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | IOException e) {
                 Thread.currentThread().interrupt();
                 break;
             }
@@ -57,7 +58,7 @@ public class SchedulerThread extends Thread {
     }
 
 
-    private void processService(String customer, String service) throws InterruptedException {
+    private void processService(String customer, String service) throws InterruptedException, IOException {
         int serviceTime = calculateServiceTime(service);
 
 //        System.out.println(customer + " Available chairs: " + chairs.availableChairs());
