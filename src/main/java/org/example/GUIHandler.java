@@ -125,7 +125,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
         synchronized (screen) {
             try {
                 TerminalSize size = screen.getTerminalSize();
-                int startX = size.getColumns()/ 2;
+                int startX = size.getColumns() * 8/10;
                 int startY = size.getRows() / 3;
 
                 String header = "QUEUE STATUS";
@@ -177,6 +177,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
     private void updateChairDisplay() {
         HashMap<Integer, String> chairsCopy;
         chairsCopy = chairsResource.getChairsCopy();
+        HashMap<Integer, Integer> remainingTimes = chairsResource.getRemainingTimes();
 
         synchronized (screen) {
             try {
@@ -187,7 +188,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
                 final int CHAIR_HEIGHT = 3;
                 final int CHAIR_SPACING = 4;
 
-                int startX = size.getColumns() / 3;
+                int startX = size.getColumns() * 5/10;
                 int initialY = size.getRows() / 3;
 
                 String header = "CHAIRS STATUS";
@@ -234,6 +235,15 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
                             screen.setCharacter(customerX + i, chairY + CHAIR_HEIGHT/2,
                                     new TextCharacter(customer.charAt(i), itemColor, TextColor.ANSI.BLACK));
                         }
+
+                        int remainingTime = remainingTimes.getOrDefault(chairId, 0);
+                        String timeStr = String.format("%02d:%02d", remainingTime / 60, remainingTime % 60);
+
+                        TextGraphics tg = screen.newTextGraphics();
+                        tg.setForegroundColor(TextColor.ANSI.YELLOW);
+                        tg.putString(startX + 8, chairY + 1, timeStr);
+
+
                     }
                 }
                 screen.refresh();
@@ -259,7 +269,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
         synchronized (screen) {
             try {
                 TerminalSize size = screen.getTerminalSize();
-                int startX = size.getColumns()/6 ;
+                int startX = size.getColumns() * 1/10;
                 int startY = size.getRows() / 3;
 
                 String header = "HAIRDRESSERS STATUS";
