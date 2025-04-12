@@ -7,8 +7,12 @@ import java.util.Queue;
 
 public class QueueSharedResource {
     private final Queue<String> queue = new LinkedList<String>();
-    private static final int MAX_CAPACITY = 5;
+    private final int MAX_CAPACITY;
     private final ArrayList<QueueEventListener> listeners = new ArrayList<>();
+
+    public QueueSharedResource(int MAX_CAPACITY) {
+        this.MAX_CAPACITY = MAX_CAPACITY;
+    }
 
     public synchronized void addQueueListener(final QueueEventListener listener) {
         if (!listeners.contains(listener)) {

@@ -1,12 +1,19 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HairDressersSharedResource {
-    private int hairdressersS = 2;
-    private int hairdressersM = 2;
-    private int hairdressersG = 2;
+    private int hairdressersS;
+    private int hairdressersM;
+    private int hairdressersG;
     private final ArrayList<HairdressersEventListener> listeners = new ArrayList<>();
+
+    public HairDressersSharedResource(int[] LISTA_FRYZJEROW) {
+        hairdressersS = LISTA_FRYZJEROW[0];
+        hairdressersM = LISTA_FRYZJEROW[1];
+        hairdressersG = LISTA_FRYZJEROW[2];
+    }
 
     public synchronized void addHairdressersListener(final HairdressersEventListener listener) {
         if (!listeners.contains(listener)) {

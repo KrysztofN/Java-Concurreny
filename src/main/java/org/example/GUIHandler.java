@@ -10,7 +10,6 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.Random;
@@ -22,16 +21,19 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
     private Screen screen;
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
     private volatile boolean running = true;
-    private final int maxQueueSize = 5;
+    private final int maxQueueSize;
+    private final int maxChairs;
     private QueueSharedResource queueResource;
     private ChairsSharedResource chairsResource;
     private HairDressersSharedResource hairdressersResource;
     private Terminal terminal;
 
-    public GUIHandler(QueueSharedResource queueResource, ChairsSharedResource chairsResource, HairDressersSharedResource hairdresserResource) {
+    public GUIHandler(QueueSharedResource queueResource, ChairsSharedResource chairsResource, HairDressersSharedResource hairdresserResource, int maxQueueSize, int macChairs) {
         this.queueResource = queueResource;
         this.chairsResource = chairsResource;
         this.hairdressersResource = hairdresserResource;
+        this.maxQueueSize = maxQueueSize;
+        this.maxChairs = macChairs;
 
         try {
             terminal = new DefaultTerminalFactory().createTerminal();
@@ -44,7 +46,6 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
             hairdresserResource.addHairdressersListener(this);
             executor.submit(this::pollForInput);
 
-            drawRandomPixels();
             updateQueueDisplay();
             updateChairDisplay();
             updateHairdresserDisplay();
@@ -54,57 +55,57 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
         }
     }
 
-    public void drawRandomPixels() {
-        synchronized (screen) {
-            try {
-                screen.clear();
-
-                Random random = new Random();
-                TerminalSize terminalSize = screen.getTerminalSize();
-                for(int column = 0; column < terminalSize.getColumns(); column++) {
-                    for(int row = 0; row < terminalSize.getRows(); row++) {
-                        screen.setCharacter(column, row, new TextCharacter(
-                                ' ',
-                                TextColor.ANSI.DEFAULT,
-                                TextColor.ANSI.values()[random.nextInt(TextColor.ANSI.values().length)]));
-                    }
-                }
-
-                String sizeLabel = "Witaj w salonie fryzjerskim";
-                int centerX = terminalSize.getColumns() / 2;
-                int centerY = terminalSize.getRows() / 2;
-                TerminalPosition labelBoxTopLeft = new TerminalPosition(centerX - sizeLabel.length()/2, centerY);
-                TerminalSize labelBoxSize = new TerminalSize(sizeLabel.length() + 2, 3);
-                TerminalPosition labelBoxTopRightCorner = labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 1);
-                TextGraphics textGraphics = screen.newTextGraphics();
-                textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
-
-                textGraphics.drawLine(
-                        labelBoxTopLeft.withRelativeColumn(1),
-                        labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2),
-                        Symbols.DOUBLE_LINE_HORIZONTAL);
-                textGraphics.drawLine(
-                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
-                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
-                        Symbols.DOUBLE_LINE_HORIZONTAL);
-
-                textGraphics.setCharacter(labelBoxTopLeft, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
-                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
-                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
-                textGraphics.setCharacter(labelBoxTopRightCorner, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
-                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
-                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
-                textGraphics.putString(labelBoxTopLeft.withRelative(1, 1), sizeLabel);
-
-                screen.refresh();
-                Thread.sleep(3000);
-                screen.clear();
-
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    public void drawRandomPixels() {
+//        synchronized (screen) {
+//            try {
+//                screen.clear();
+//
+//                Random random = new Random();
+//                TerminalSize terminalSize = screen.getTerminalSize();
+//                for(int column = 0; column < terminalSize.getColumns(); column++) {
+//                    for(int row = 0; row < terminalSize.getRows(); row++) {
+//                        screen.setCharacter(column, row, new TextCharacter(
+//                                ' ',
+//                                TextColor.ANSI.DEFAULT,
+//                                TextColor.ANSI.values()[random.nextInt(TextColor.ANSI.values().length)]));
+//                    }
+//                }
+//
+//                String sizeLabel = "Witaj w salonie fryzjerskim";
+//                int centerX = terminalSize.getColumns() / 2;
+//                int centerY = terminalSize.getRows() / 2;
+//                TerminalPosition labelBoxTopLeft = new TerminalPosition(centerX - sizeLabel.length()/2, centerY);
+//                TerminalSize labelBoxSize = new TerminalSize(sizeLabel.length() + 2, 3);
+//                TerminalPosition labelBoxTopRightCorner = labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 1);
+//                TextGraphics textGraphics = screen.newTextGraphics();
+//                textGraphics.fillRectangle(labelBoxTopLeft, labelBoxSize, ' ');
+//
+//                textGraphics.drawLine(
+//                        labelBoxTopLeft.withRelativeColumn(1),
+//                        labelBoxTopLeft.withRelativeColumn(labelBoxSize.getColumns() - 2),
+//                        Symbols.DOUBLE_LINE_HORIZONTAL);
+//                textGraphics.drawLine(
+//                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(1),
+//                        labelBoxTopLeft.withRelativeRow(2).withRelativeColumn(labelBoxSize.getColumns() - 2),
+//                        Symbols.DOUBLE_LINE_HORIZONTAL);
+//
+//                textGraphics.setCharacter(labelBoxTopLeft, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
+//                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+//                textGraphics.setCharacter(labelBoxTopLeft.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
+//                textGraphics.setCharacter(labelBoxTopRightCorner, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
+//                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(1), Symbols.DOUBLE_LINE_VERTICAL);
+//                textGraphics.setCharacter(labelBoxTopRightCorner.withRelativeRow(2), Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
+//                textGraphics.putString(labelBoxTopLeft.withRelative(1, 1), sizeLabel);
+//
+//                screen.refresh();
+//                Thread.sleep(3000);
+//                screen.clear();
+//
+//            } catch (IOException | InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     @Override
     public void onQueueChanged(QueueSharedResource queue) {
@@ -125,8 +126,8 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
         synchronized (screen) {
             try {
                 TerminalSize size = screen.getTerminalSize();
-                int startX = size.getColumns() * 8/10;
-                int startY = size.getRows() / 3;
+                int startX = size.getColumns() * 6/10;
+                int startY = size.getRows() / 10;
 
                 String header = "QUEUE STATUS";
                 for(int i=0; i < header.length(); i++) {
@@ -183,26 +184,25 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
             try {
                 TerminalSize size = screen.getTerminalSize();
 
-                final int MAX_CHAIRS = 4;
                 final int CHAIR_WIDTH = 5;
                 final int CHAIR_HEIGHT = 3;
                 final int CHAIR_SPACING = 4;
 
-                int startX = size.getColumns() * 5/10;
-                int initialY = size.getRows() / 3;
+                int startX = size.getColumns() * 3/10;
+                int initialY = size.getRows() / 10;
 
                 String header = "CHAIRS STATUS";
                 for (int i = 0; i < header.length(); i++) {
                     screen.setCharacter(startX + i, initialY - 2, new TextCharacter(header.charAt(i)));
                 }
 
-                for (int chairId = 0; chairId < MAX_CHAIRS; chairId++) {
+                for (int chairId = 0; chairId < maxChairs; chairId++) {
                     int chairY = initialY + (chairId * CHAIR_SPACING);
 
                     drawChair(screen, startX, chairY, CHAIR_WIDTH, CHAIR_HEIGHT);
 
                     screen.setCharacter(startX - 2, chairY + 1,
-                            new TextCharacter(Character.forDigit(chairId, 10)));
+                            new TextCharacter(Character.forDigit(chairId + 1, 10)));
 
                     if (chairsCopy.containsKey(chairId)) {
                         String customer = chairsCopy.get(chairId);
@@ -270,7 +270,7 @@ public class GUIHandler implements QueueEventListener, ChairsEventListener, Hair
             try {
                 TerminalSize size = screen.getTerminalSize();
                 int startX = size.getColumns() * 1/10;
-                int startY = size.getRows() / 3;
+                int startY = size.getRows() / 10;
 
                 String header = "HAIRDRESSERS STATUS";
                 for(int i=0; i < header.length(); i++) {

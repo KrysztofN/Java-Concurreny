@@ -5,10 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChairsSharedResource {
-    private int MAX_CHAIRS = 4;
+    private int MAX_CHAIRS;
     private final ArrayList<ChairsEventListener> listeners = new ArrayList<>();
     private HashMap<Integer, String> chairCustomer = new HashMap<>();
     private HashMap<Integer, Long> chairEndTimes = new HashMap<>();
+
+    public ChairsSharedResource(int MAX_CHAIRS) {
+        this.MAX_CHAIRS = MAX_CHAIRS;
+    }
 
     public synchronized void addChairsListener(final ChairsEventListener listener) {
         if (!listeners.contains(listener)) {
