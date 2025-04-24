@@ -20,7 +20,7 @@ public class QueueThread extends Thread {
     public void run() {
         Random r = new Random();
         while(running) {
-            int sleepTime = r.nextInt(1000);
+            int sleepTime = r.nextInt(500);
             int option = r.nextInt(3);
             try {
                 if (Thread.currentThread().isInterrupted()) {
@@ -31,7 +31,7 @@ public class QueueThread extends Thread {
                 throw new RuntimeException(e);
             } finally {
                 if (queue.isFull()) {
-//                    System.out.println("Queue full");
+                    System.out.println("Queue full");
                 } else{
                     try {
                         String customer = counters[option].getCounter();
