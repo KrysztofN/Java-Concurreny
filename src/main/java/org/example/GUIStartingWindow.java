@@ -23,8 +23,8 @@ public class GUIStartingWindow {
     private Screen screen;
     private Terminal terminal;
     private Map<String, String> configValues = new HashMap<>();
-    private String[] fieldNames = {"Fryzjerzy S", "Fryzjerzy M", "Fryzjerzy G", "Liczba Foteli (LF)", "Wielkość Kolejki (WK)"};
-    private String[] fieldKeys = {"F_S", "F_M", "F_G", "LF", "WK"};
+    private String[] fieldNames = {"Liczba Usług (LU)", "Fryzjerzy S", "Fryzjerzy M", "Fryzjerzy G", "Liczba Foteli (LF)", "Wielkość Kolejki (WK)"};
+    private String[] fieldKeys = {"LU", "F_S", "F_M", "F_G", "LF", "WK"};
     private boolean configConfirmed = false;
     private int selectedField = 0;
 
@@ -98,6 +98,7 @@ public class GUIStartingWindow {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node = objectMapper.readTree(jsonData);
 
+        configValues.put("LU", node.get("LU").asText());
         configValues.put("F_S", String.valueOf(node.get("F").get("S").asInt()));
         configValues.put("F_M", String.valueOf(node.get("F").get("M").asInt()));
         configValues.put("F_G", String.valueOf(node.get("F").get("G").asInt()));
@@ -223,6 +224,9 @@ public class GUIStartingWindow {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode rootNode = objectMapper.createObjectNode();
+
+            // Zapisz LU
+            rootNode.put("LU", configValues.get("LU"));
 
             // Zapisz F (fryzjerzy)
             ObjectNode fNode = objectMapper.createObjectNode();
