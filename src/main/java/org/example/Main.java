@@ -25,12 +25,10 @@ public class Main {
         byte[] jsonData = Files.readAllBytes(Paths.get("src/main/java/org/example/config.json"));
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node = objectMapper.readTree(jsonData);
-        JsonNode luNode = node.get("LU");
         JsonNode fNode = node.get("F");
         JsonNode wkNode = node.get("WK");
         JsonNode lfNode = node.get("LF");
 
-        String LiczbaUslug = luNode.asText();
         int WielkoscKolejki = wkNode.asInt();
         int LiczbaFoteli = lfNode.asInt();
 
